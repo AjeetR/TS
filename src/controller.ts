@@ -103,7 +103,10 @@ export const getAllAccounts = async () => {
 export const getAccount = async (req : any) => {
   try {
     const accounts: Accounts = (await readFile()) as Accounts;
-    return accounts[req.accountId]
+    const result = {
+      [req.accountId] : accounts[req.accountId]
+    }
+    return result
   } catch (error) {
     return error;
   }
