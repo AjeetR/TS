@@ -1,12 +1,19 @@
 import { json } from 'body-parser'
 import express, { response } from 'express'
-import { createAccount, updateAccount, getAccounts } from './controller'
+import { createAccount, updateAccount, getAllAccounts, getAccount } from './controller'
 
 const route = express.Router()
 
 //Get accounts
 route.get('/', async (req, res) => {
-    const responseData = await getAccounts();
+    const responseData = await getAllAccounts();
+    res.send(responseData)
+    })
+
+//Get account
+route.get('/:accountId', async (req, res) => {
+    // const accountId : any = req.params;
+    const responseData = await getAccount(req.params);
     res.send(responseData)
     })
 
