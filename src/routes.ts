@@ -1,6 +1,6 @@
 import { json } from 'body-parser'
 import express, { response } from 'express'
-import { createAccount, updateAccount, getAllAccounts, getAccount } from './controller'
+import { createAccount, updateAccount, getAllAccounts, getAccount, deleteAccount } from './controller'
 
 const route = express.Router()
 
@@ -25,14 +25,14 @@ route.post('/', async (req, res) => {
 
 // update account
 route.put('/:accountId', (req, res) => {
-    const accountId =  req.params;
-    
-    res.send(accountId)
+    const updatedAccount = updateAccount(req)
+    res.send(updatedAccount)
 })
 
 //delete account
-route.delete('/', (req, res) => {
-    res.send('Delete Route')
+route.delete('/:accountId', (req, res) => {
+    const deletedAccount = deleteAccount(req)
+    res.send(deletedAccount)
 })
 
 export default route

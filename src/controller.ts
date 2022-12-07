@@ -1,5 +1,6 @@
 import fs, { read } from "fs";
 import path from "path";
+import { downloadS3File, uploads3File } from './awsS3'
 
 export interface CreateAccount {
   accountId: string;
@@ -9,6 +10,7 @@ export interface CreateAccount {
 }
 
 export interface Account {
+  [x: string]: any;
   accountType: number;
   apiKey: string;
   apiPassword?: string;
@@ -34,24 +36,11 @@ export const readFile = async (): Promise<Object> => {
   });
 };
 
-// export const readFile_ = async (): Promise<Object> => {
-//   return new Promise((resolve, reject) => {
-//     fs.readFile(path.join(__dirname, "accounts.json"),"utf-8",(error, result: string) => {
-//         if (error) {
-//           reject(error);
-//         }
-//         const responseData = JSON.parse(result);
-//         resolve(responseData);
-//       });
-//   });
-// };
-
 //Writing to json file
 export const writeToFile = async (newAccount: string): Promise<Object> => {
-  const buff = Buffer.from(newAccount, "utf-8");
   return new Promise((resolve, reject) => {
     fs.writeFile(
-      path.join(__dirname, "accounts.json"), buff, (error) => {
+      path.join(__dirname, "accounts.json"), newAccount, (error) => {
         if (error) {
           reject(error);
         }
@@ -73,13 +62,7 @@ export const createAccount = async (req: CreateAccount) => {
       },
     };
     const accountAdded = Object.assign(accounts, newAccountData);
-    writeToFile(JSON.stringify(accountAdded))
-      .then((result) => {
-        return result;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    await writeToFile(JSON.stringify(accountAdded))
   } catch (error) {
     return error;
   }
@@ -88,12 +71,13 @@ export const createAccount = async (req: CreateAccount) => {
 //fetching all account details
 export const getAllAccounts = async () => {
   try {
-    const accounts: Accounts = (await readFile()) as Accounts;
-    //no apiPassword in the response
+    await downloadS3File();
+    const accounts: Accounts = await readFile() as Accounts;
     Object.keys(accounts).map((key) => {
-      delete accounts[key]["apiPassword"];
+      delete accounts[key]["apiPassword"];          //removing apiPassword in the response
     });
     return accounts;
+
   } catch (error) {
     return error;
   }
@@ -113,12 +97,34 @@ export const getAccount = async (req : any) => {
 };
 
 //updating account details
-export const updateAccount = async (accountId: BigInteger) => {
+export const updateAccount = async (req : any) => {
   try {
-    const accounts: string = (await readFile()) as string;
-    const jsonAccounts = JSON.parse(accounts);
-  } catch (error) {}
+    const accounts: Accounts = (await readFile()) as Accounts;
+    const newAccountData: Accounts = {
+      [req.params.accountId]: {
+        accountType: req.body.accountType,
+        apiKey: req.body.apiKey,
+        apiPassword: req.body.apiPassword,
+      },
+    };
+    const accountAdded = Object.assign(accounts, newAccountData);
+    await writeToFile(JSON.stringify(accountAdded))
+  } catch (error) {
+    return error;
+  }
 };
+
+//Delete Account
+export const deleteAccount = async(req : any) => {
+  try {
+    const accounts: Accounts = (await readFile()) as Accounts;
+    delete accounts[req.params.accountId];
+    await writeToFile(JSON.stringify(accounts))
+    return accounts;
+  } catch (error) {
+    return error;
+  }
+}
 
 // export const s3Bucket = () => {
 
