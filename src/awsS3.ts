@@ -5,44 +5,39 @@ import path from "path";
 import * as s3Config from "./config";
 
 //Dodnload file from s3
-export const downloadS3File = async () => {
+export const callDownloadS3File = async () => {
+// return new Promise (function(resolve, reject){
   const params: any = {
     Bucket: s3Config.BUCKET, // bucket name
     Key: s3Config.KEYFILE, // file name
   };
   console.log("Params : ", params);
-  let file = createWriteStream("./accounts.json");
-
+  // let file = fs.createWriteStream("./accounts.json");
   try {
-    return new Promise<void>(async (resolve, reject) => {
       AWS.config.update({
         accessKeyId: s3Config.ACCESSKEYID,
         secretAccessKey: s3Config.SECRETACCESSKEY,
         region: s3Config.REGION,
       });
       const s3 = new AWS.S3();
-
-      // const stream = s3.getObject(params).createReadStream()
-      // stream.pipe(file)
-      // stream.on('end', ()=> { resolve()} )
-      // stream.on('error', (err)=>{reject(err)})
-
-      s3.getObject(params)
-        .createReadStream()
-        .on("end", () => {
-          console.log("Download successful");
-          return resolve();
-        })
-        .on("error", () => {
-          console.log("Failed to download");
-          return reject();
-        })
-        .pipe(file);
-    });
+      const result = await s3.getObject(params).promise();
+      if(result && result.Body){
+        return result.Body.toString()
+        // const data = Buffer.from(body, 'base64').toString()
+        // return data;
+      }
+      // s3.getObject(params).createReadStream().on("end", () => {
+      //     resolve('Successful');
+      //   }).on("error", () => {
+      //     console.log("Failed to download");
+      //     reject('Failed');
+      //   }).pipe(file);
+    // return result;
   } catch (error) {
     return error;
   }
-};
+// });
+}
 
 //uploading file to s3 bucket
 export const uploads3File = async () => {
@@ -68,13 +63,14 @@ export const uploads3File = async () => {
           if (err) throw err;
           console.log("Uploaded Successfully at location : ", _data.location);
         });
-      }
-    );
+      });
   });
 };
 
-// downloadS3File();
+// export default { downloadS3File, uploads3File }
 
+// downloadS3File();
+// callDownloadS3File();
 // //# This function for delete file from s3 bucket
 // const s3delete = function (params) {
 //     return new Promise((resolve, reject) => {

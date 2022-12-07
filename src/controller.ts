@@ -1,6 +1,6 @@
 import fs, { read } from "fs";
 import path from "path";
-import { downloadS3File, uploads3File } from './awsS3'
+import  { callDownloadS3File } from './awsS3'
 
 export interface CreateAccount {
   accountId: string;
@@ -29,11 +29,15 @@ export const readFile = async (): Promise<Object> => {
       (error, result: string) => {
         if (error) {
           reject(error);
+        } 
+        else if(result == '')
+        { resolve('No Data found') }
+        else{ 
+          resolve(JSON.parse(result))
         }
-        resolve(JSON.parse(result));
       }
     );
-  });
+   });
 };
 
 //Writing to json file
@@ -44,7 +48,7 @@ export const writeToFile = async (newAccount: string): Promise<Object> => {
         if (error) {
           reject(error);
         }
-        resolve("Written to file");
+        resolve("Operation Successfully");
       }
     );
   });
@@ -53,7 +57,7 @@ export const writeToFile = async (newAccount: string): Promise<Object> => {
 //creating new account
 export const createAccount = async (req: CreateAccount) => {
   try {
-    const accounts: Accounts = (await readFile()) as Accounts;
+    const accounts: Accounts = await readFile() as Accounts;
     const newAccountData: Accounts = {
       [req.accountId]: {
         accountType: req.accountType,
@@ -71,51 +75,68 @@ export const createAccount = async (req: CreateAccount) => {
 //fetching all account details
 export const getAllAccounts = async () => {
   try {
-    await downloadS3File();
-    const accounts: Accounts = await readFile() as Accounts;
-    Object.keys(accounts).map((key) => {
-      delete accounts[key]["apiPassword"];          //removing apiPassword in the response
-    });
-    return accounts;
-
+    const data = await callDownloadS3File();
+    console.log(data)
+    return data;
+    // await callDownloadS3File().then(result => {/
+    //   console.log(result)
+    //   readFile().then(res => {
+    //     const accounts : Accounts = res as Accounts
+    //   Object.keys(accounts).map((key) => {
+    //     delete accounts[key]["apiPassword"];          //removing apiPassword in the response
+    //   });
+    //   return accounts;
+    //   }).catch(error => {console.log(error)})
+    // }).catch(err => {return err})
   } catch (error) {
     return error;
   }
 };
 
 //get account
-export const getAccount = async (req : any) => {
+export const getAccount = async (req: any) => {
   try {
     const accounts: Accounts = (await readFile()) as Accounts;
-    const result = {
-      [req.accountId] : accounts[req.accountId]
+    if (accounts[req.accountId] !== undefined) {
+      const result = {
+        [req.accountId]: accounts[req.accountId]
+      }
+      return result
+    }else{
+      return ({ "statusCode": 404, "message": `No Data found for accountId : ${req.accountId}` })
     }
-    return result
   } catch (error) {
     return error;
   }
 };
 
 //updating account details
-export const updateAccount = async (req : any) => {
+export const updateAccount = async (req: any) => {
   try {
     const accounts: Accounts = (await readFile()) as Accounts;
-    const newAccountData: Accounts = {
-      [req.params.accountId]: {
-        accountType: req.body.accountType,
-        apiKey: req.body.apiKey,
-        apiPassword: req.body.apiPassword,
-      },
-    };
-    const accountAdded = Object.assign(accounts, newAccountData);
-    await writeToFile(JSON.stringify(accountAdded))
+    if (accounts[req.params.accountId] !== undefined) {
+      const newAccountData: Accounts = {
+        [req.params.accountId]: {
+          accountType: req.body.accountType,
+          apiKey: req.body.apiKey,
+          apiPassword: req.body.apiPassword,
+        },
+      };
+      const accountAdded = Object.assign(accounts, newAccountData);
+      const updated = await writeToFile(JSON.stringify(accountAdded))
+      return updated;
+    }else {
+      let response = { "statusCode": 404, "message": `No Data found for accountId : ${req.params.accountId}` }
+      return (response)
+    }
   } catch (error) {
     return error;
   }
+
 };
 
 //Delete Account
-export const deleteAccount = async(req : any) => {
+export const deleteAccount = async (req: any) => {
   try {
     const accounts: Accounts = (await readFile()) as Accounts;
     delete accounts[req.params.accountId];

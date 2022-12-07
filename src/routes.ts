@@ -7,6 +7,7 @@ const route = express.Router()
 //Get accounts
 route.get('/', async (req, res) => {
     const responseData = await getAllAccounts();
+    console.log('Response ',responseData)
     res.send(responseData)
     })
 
@@ -24,14 +25,14 @@ route.post('/', async (req, res) => {
 })
 
 // update account
-route.put('/:accountId', (req, res) => {
-    const updatedAccount = updateAccount(req)
+route.put('/:accountId', async (req, res) => {
+    var updatedAccount = await updateAccount(req)
     res.send(updatedAccount)
 })
 
 //delete account
-route.delete('/:accountId', (req, res) => {
-    const deletedAccount = deleteAccount(req)
+route.delete('/:accountId', async (req, res) => {
+    const deletedAccount = await deleteAccount(req)
     res.send(deletedAccount)
 })
 
