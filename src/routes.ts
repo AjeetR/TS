@@ -7,7 +7,6 @@ const route = express.Router()
 //Get accounts
 route.get('/', async (req, res) => {
     const responseData = await getAllAccounts();
-    console.log('Response ',responseData)
     res.send(responseData)
     })
 

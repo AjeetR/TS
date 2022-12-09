@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: IdenTrust API
+  description: <b>IdenTrust Worker Management API </b>
+  version: 1.0.0
+
+security:
+ - bearerAuth: []
+ 
+paths:
+  /identrust:
+    get:
+      tags:
+        - account
+      summary: Returns account details
+      description: Accounts information
+      operationId: GetAccounts
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/account'
+              example:
+                accountId: 
+                  accountType : integer
+                  apiKey : string
+        '400':
+          description: Request failed
+        '404':
+          description: Not found
+    post:
+      tags:
+        - account
+      summary: Create Account
+      description: Creating Account
+      operationId: CreateAccount
+      parameters:
+      - name: New Account Details
+        in: body
+        description: Account.
+        required: true
+        schema:
+          $ref: '#/components/schemas/createAccount'
+      responses:
+        '201':
+          description: Successful operation
+        '400':
+          description: Invalid request
+  /identrust/{accountId}:
+    get:
+      tags:
+        - account
+      summary: Get Account details by ID
+      description: Get account details by account ID
+      operationId: GetAccountByID
+      parameters:
+        - name: accountId
+          in: path
+          description: identifier of an account
+          type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              type: Object
+              schema:
+                $ref: '#/components/schemas/account'  
+        '400':
+          description: Invalid request
+    put:
+      tags:
+        - account
+      summary: Update account details
+      description: Allows updating of any of the accounts created
+      operationId: updateAccount
+      produces:
+        - application/json
+      parameters:
+        - name: accountID
+          in: path
+          description: Account Identification
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Updated account object
+          required: true
+          schema:
+            $ref: '#/components/schemas/updateAccount'
+
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid request
+    delete:
+      tags:
+        - account
+      summary: Deletes a particular account from accounts
+      description: Deleting a perticular account
+      operationId: DeleteAccount
+      parameters:
+        - name: accountId
+          in: path
+          description: identifier of an account
+          type: int64
+          required: true
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid request
+
+  /restart:
+    post:
+      tags:
+        - account
+      summary: Restart ec2 instance
+      description: restart
+      operationId: RestartEC2Instance
+      responses:
+        '200':
+          description: successful operation
+
+components:
+  schemas:
+    account:
+      required:
+        - accountId
+        - accountType
+        - apiKey
+        - apiPassword
+      type: object
+      properties:
+        accountId: 
+          properties:
+            accountType:
+              type: integer
+            apiKey:
+              type: string
+            apiPassword:
+              type: string
+    updateAccount:
+      properties:
+        accountKey: 
+          type: integer
+        apiKey: 
+          type: string
+        apiPAssword: 
+          type: string
+    createAccount:
+      properties:
+        accountId:
+          type: string
+        accountKey: 
+          type: integer
+        apiKey: 
+          type: string
+        apiPAssword: 
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      name: barertoken
+      in: header
+  
