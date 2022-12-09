@@ -10,7 +10,7 @@ export interface CreateAccount {
 }
 
 export interface Account {
-  [x: string]: any;
+  [accountId: string]: any;
   accountType: number;
   apiKey: string;
   apiPassword?: string;
@@ -29,7 +29,7 @@ export const createAccount = async (req: CreateAccount) => {
     const newAccountData: Accounts = {
       [req.accountId]: {
         accountType: req.accountType,
-        apiKey: req.apiKey,
+        apiKey: req.apiKey.toString(),
         apiPassword: await encrypt(req.apiPassword),
       },
     };

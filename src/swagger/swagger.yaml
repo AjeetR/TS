@@ -37,12 +37,10 @@ paths:
       description: Creating Account
       operationId: CreateAccount
       parameters:
-      - name: New Account Details
-        in: body
-        description: Account.
+      requestBody:
         required: true
-        schema:
-          $ref: '#/components/schemas/createAccount'
+          schema:
+            $ref: '#/components/schemas/createAccount'
       responses:
         '201':
           description: Successful operation
@@ -58,15 +56,15 @@ paths:
       parameters:
         - name: accountId
           in: path
+          schema :
+            $ref: '#/components/schemas'
           description: identifier of an account
-          type: string
           required: true
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
-              type: Object
               schema:
                 $ref: '#/components/schemas/account'  
         '400':
@@ -77,21 +75,21 @@ paths:
       summary: Update account details
       description: Allows updating of any of the accounts created
       operationId: updateAccount
-      produces:
-        - application/json
       parameters:
-        - name: accountID
+        - name: accountId
           in: path
-          description: Account Identification
+          schema:
+            $ref: '#/components/schemas'
+          description: Identifier of an account
           required: true
-          type: string
-        - in: body
-          name: body
+        - name: updated account data
+          in: body
           description: Updated account object
           required: true
           schema:
             $ref: '#/components/schemas/updateAccount'
-
+      requestBody:
+        $ref: '#/components/schemas/updateAccount'
       responses:
         '200':
           description: successful operation
@@ -106,8 +104,9 @@ paths:
       parameters:
         - name: accountId
           in: path
-          description: identifier of an account
-          type: int64
+          schema :
+            $ref: '#/components/schemas'
+          description: Identifier of an account
           required: true
       responses:
         '200':
@@ -146,17 +145,17 @@ components:
               type: string
     updateAccount:
       properties:
-        accountKey: 
+        accountType: 
           type: integer
         apiKey: 
           type: string
-        apiPAssword: 
+        apiPassword: 
           type: string
     createAccount:
       properties:
         accountId:
           type: string
-        accountKey: 
+        accountType: 
           type: integer
         apiKey: 
           type: string

@@ -1,0 +1,150 @@
+openapi: 3.0.3
+info:
+  title: IdenTrust API
+  description: <b>IdenTrust Worker Management API </b>
+  version: 1.0.0
+
+security:
+ - bearerAuth: []
+
+paths:
+  /identrust:
+    get:
+      tags:
+        - account
+      description: List all account details
+      operationId: getAllAccount
+      responses:
+        '200':
+          description: Operation successful
+          content:
+            application/json:
+              example:
+                accountId:
+                  accountType: number
+                  apiKey: string
+        '400':
+          description: Request failed
+    post:
+      tags:
+        - account
+      description: Create new account
+      operationId: createAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/schemas/createAccount'
+      responses:
+        '200':
+          description: Created Successful
+        '400':
+          description: Request failed
+  /identrust/{accountId}:
+    get:
+      tags:
+        - account
+      description: Read account details by accountId
+      operationId: GetAccountByID
+      parameters:
+        - in: path
+          name: accountId
+          schema:
+            $ref: '#components/schemas/accountID'
+          required: true
+      responses:
+        '200':
+          description: Found Successful
+          content:
+            example:
+              schema: 
+                $ref: '#components/schemas/account'
+        '400':
+          description: Request Failed
+    put:
+      tags: 
+        - account
+      description: Update account details
+      operationId: updateAccount
+      parameters:
+        - in: path
+          name: accountId
+          schema:
+            $ref: '#components/schemas/accountId'
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/schemas/updateAccount'
+      responses:
+        '200':
+          description: Updated Successful
+        '400':
+          description: Request Failed
+    delete:
+      tags: 
+        - account
+      description: Delete account
+      operationId: DeleteAccount
+      parameters:
+        - in: path
+          name: accountId
+          schema:
+            $ref: 'components/schemas/accountId'
+          required: true
+      responses:
+        '200':
+          description: Deleted Successful 
+        '400':
+          description: Request Failed
+
+components:
+  schemas:
+    account:
+      required:
+        - accountId
+        - accountType
+        - apiKey
+        - apiPassword
+      type: object
+      properties:
+        accountId: 
+          properties:
+            accountType:
+              type: integer
+            apiKey:
+              type: string
+            apiPassword:
+              type: string
+    updateAccount:
+      properties:
+        accountType: 
+          type: integer
+        apiKey: 
+          type: string
+        apiPassword: 
+          type: string
+    createAccount:
+      properties:
+        accountId:
+          type: string
+        accountType: 
+          type: integer
+        apiKey: 
+          type: string
+        apiPassword: 
+          type: string
+    accountId:
+      type: string
+
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      name: barertoken
+      in: header
